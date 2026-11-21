@@ -1,5 +1,19 @@
 [
  {
+  "v": "1795294755",
+  "semver": "1.28.3",
+  "titre": "Démo : lecture de ticket d'exemple",
+  "demo": true,
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans la démo, la photo d'un ticket remplit maintenant la dépense avec un exemple."
+   }
+  ]
+ },
+ {
   "v": "1795259954",
   "semver": "1.28.2",
   "titre": "Photo des tickets de caisse",

@@ -97,7 +97,11 @@ function comptaTicketServeur(dataUrl){
 function gmTicketIA(file,statut){
   if(!navigator.onLine) return Promise.reject(new Error("hors-ligne"));
   // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde sa propre version.
-  if(window.GM_DEMO) return Promise.reject(comptaTicketErr("démo"));
+  // Démo : pas de compte, donc pas d'appel serveur ; on montre un ticket « lu » d'exemple.
+  if(window.GM_DEMO) return new Promise(function(ok){ setTimeout(function(){
+    var d=new Date(), j=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    ok({date:j,montant:42.9,fournisseur:"Supermarché",description:"Courses buvette",categorie:"Achats buvette",moyen:"CB"});
+  },1500); });
   return comptaTicketReduire(file,1024,0.6).then(function(petite){ return comptaTicketServeur(petite); });
 }
 function gmTicketMsgErreur(e){
