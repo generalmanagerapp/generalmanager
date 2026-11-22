@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir -p /tmp/site
           rsync -a --exclude .git --exclude .github --exclude tests --exclude functions --exclude outils ./ /tmp/site/
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: /tmp/site
       - id: pages
