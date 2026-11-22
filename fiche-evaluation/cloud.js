@@ -26,7 +26,14 @@ try{
   const col=uid=>FS.collection(db,'observateurs',uid,'matchs');
   window.Cloud={
     onAuth:cb=>AU.onAuthStateChanged(auth,cb),
-    signIn:(e,p)=>AU.signInWithEmailAndPassword(auth,e,p),
+    signIn:(e,p)=>AU.signInWithEmailAndPassword(auth,e,p).catch(err=>{
+      if(err&&err.code==='auth/multi-factor-auth-required'){
+        const r=AU.getMultiFactorResolver(auth,err);
+        const h=r.hints.find(x=>x.factorId===AU.TotpMultiFactorGenerator.FACTOR_ID)||r.hints[0];
+        throw {code:'mfa',finish:code=>r.resolveSignIn(AU.TotpMultiFactorGenerator.assertionForSignIn(h.uid,code))};
+      }
+      throw err;
+    }),
     signUp:(e,p)=>AU.createUserWithEmailAndPassword(auth,e,p),
     reset:e=>AU.sendPasswordResetEmail(auth,e),
     signOut:()=>AU.signOut(auth),

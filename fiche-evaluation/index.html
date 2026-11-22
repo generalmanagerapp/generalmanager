@@ -1704,11 +1704,23 @@ function buildAccount(){
   var who=h('p',{class:'who2'});
   var cnt=h('span',{class:'cnt'});
   var info=h('p',{class:'status',style:'padding:16px'});
+  var mfa=null;
+  var codeIn=h('input',{type:'text',inputmode:'numeric',autocomplete:'one-time-code',maxlength:'6','aria-label':'Code à 6 chiffres',placeholder:'code à 6 chiffres'});
+  var codeBtn=h('button',{type:'button',class:'btn',text:'Valider le code'});
+  var codeBox=h('div',{class:'acc',hidden:true,style:'padding:0'},[h('p',{class:'legend',text:"Double authentification : ouvre ton application d'authentification et saisis le code à 6 chiffres."}),h('div',{class:'f'},[codeIn]),codeBtn]);
+  codeBtn.addEventListener('click',function(){
+    if(!mfa)return;
+    msg.textContent='…';codeBtn.disabled=true;
+    mfa.finish(codeIn.value.trim()).then(function(){mfa=null;codeIn.value='';codeBox.hidden=true;msg.textContent='';},function(e){
+      msg.textContent=(e&&e.code==='auth/invalid-verification-code')?"Code incorrect.":"Code refusé ("+((e&&e.code)||'?')+"). Réessaie.";
+    }).then(function(){codeBtn.disabled=false;});
+  });
   function run(fn,ok){
     if(!Cloud){msg.textContent="Site injoignable pour le moment.";return;}
     msg.textContent='…';inBtn.disabled=upBtn.disabled=true;
     fn().then(function(){pw.value='';msg.textContent=ok||'';},function(e){
-      msg.textContent=AUTH_ERR[e&&e.code]||"Connexion impossible pour le moment. Réessaie.";
+      if(e&&e.code==='mfa'){mfa=e;codeBox.hidden=false;codeIn.focus();msg.textContent='';return;}
+      msg.textContent=AUTH_ERR[e&&e.code]||("Connexion impossible ("+((e&&e.code)||'?')+"). Réessaie.");
     }).then(function(){inBtn.disabled=upBtn.disabled=false;});
   }
   inBtn.addEventListener('click',function(){run(function(){return Cloud.signIn(em.value.trim(),pw.value);});});
@@ -1723,7 +1735,7 @@ function buildAccount(){
     h('p',{class:'legend',text:"Connecte-toi pour retrouver tes fiches sur téléphone et sur ordinateur. Sans compte, tout reste sur cet appareil."}),
     h('div',{class:'f'},[em]),h('div',{class:'f pwd'},[pw,eye]),
     h('div',{class:'btnrow'},[inBtn,upBtn]),
-    h('div',{class:'btnrow'},[rsBtn]),msg
+    h('div',{class:'btnrow'},[rsBtn]),codeBox,msg
   ]);
   var user=h('div',{class:'acc'},[h('p',{class:'who2'},['Connecté : ',who]),h('div',{class:'btnrow'},[outBtn])]);
   R.acc={form:form,user:user,info:info,who:who,cnt:cnt};
