@@ -1696,3 +1696,15 @@ describe("Appel à bénévoles (ben_inscriptions)", () => {
   });
 
 });
+
+describe("Fiches d'observation EAD (observateurs/{uid}/matchs)", () => {
+  const fiche = { id: "m1", updatedAt: 1, date: "2026-11-22", info: {}, cur: 0, p: [{}, {}] };
+  it("l'observateur lit et écrit ses fiches, personne d'autre", async () => {
+    await assertSucceeds(setDoc(doc(await as("parentA"), "observateurs/parentA/matchs/m1"), fiche));
+    await assertSucceeds(getDoc(doc(await as("parentA"), "observateurs/parentA/matchs/m1")));
+    await assertFails(getDoc(doc(await as("dirA"), "observateurs/parentA/matchs/m1")));
+    await assertFails(setDoc(doc(await as("dirA"), "observateurs/parentA/matchs/m2"), fiche));
+    await assertFails(setDoc(doc(await as("parentA"), "observateurs/parentA/matchs/m3"), { ...fiche, role: "admin" }));
+    await assertSucceeds(deleteDoc(doc(await as("parentA"), "observateurs/parentA/matchs/m1")));
+  });
+});

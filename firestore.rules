@@ -350,6 +350,14 @@ service cloud.firestore {
       allow read, write: if superAdmin();
     }
 
+    // ── Fiches d'observation EAD (fiche-evaluation/) ──
+    // Chaque observateur ne lit et n'écrit que ses propres fiches.
+    match /observateurs/{uid}/matchs/{matchId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['id','updatedAt','date','info','cur','p']);
+    }
+
     // ── Demandes d'essai déposées depuis le site (accueil.generalmanagerapp.fr) ──
     // Formulaire public : création seule, contenu strictement contrôlé. Seul le
     // super admin les lit et les traite (Plateforme).
